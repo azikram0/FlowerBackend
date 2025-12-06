@@ -19,28 +19,28 @@ public class CatalogController {
     }
 
     @GetMapping("/search-flowers")
-    List<FlowerCardDto> searchFlowers() {
+    public List<FlowerCardDto> searchFlowers() {
         return null;
     }
 
     @GetMapping("/all-families")
-    List<String> getAllFamilies() {
+    public List<String> getAllFamilies() {
         // TODO("Вернуть список всех семейств")
         return null;
     }
 
     @GetMapping("/all-colors")
-    List<String> getAllColors() {
+    public List<String> getAllColors() {
         return null;
     }
 
     @GetMapping("/all-care-tags")
-    List<String> getAllCareTags() {
+    public List<String> getAllCareTags() {
         return null;
     }
 
     @GetMapping("/price-range")
-    PriceRangeDto getPriceRange() {
+    public PriceRangeDto getPriceRange() {
         return null;
     }
 }
