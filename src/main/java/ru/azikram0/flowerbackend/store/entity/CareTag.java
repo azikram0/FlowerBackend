@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Entity
 @Table(name = "care_tag")
 @NoArgsConstructor
@@ -22,15 +20,4 @@ public class CareTag {
 
     @Column(name = "name", nullable = false)
     private String name;
-
-    @ManyToMany(
-            fetch = FetchType.LAZY,
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}
-    )
-    @JoinTable(
-            name = "flower_care_tag",
-            joinColumns = @JoinColumn(name = "care_tag_id"),
-            inverseJoinColumns = @JoinColumn(name = "flower_id")
-    )
-    private List<Flower> flowers;
 }

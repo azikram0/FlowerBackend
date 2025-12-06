@@ -46,4 +46,15 @@ public class Flower {
             inverseJoinColumns = @JoinColumn(name = "color_id")
     )
     private List<Color> colors;
+
+    @ManyToMany(
+            fetch = FetchType.LAZY,
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}
+    )
+    @JoinTable(
+            name = "flower_care_tag",
+            joinColumns = @JoinColumn(name = "flower_id"),
+            inverseJoinColumns = @JoinColumn(name = "care_tag_id")
+    )
+    private List<CareTag> careTags;
 }

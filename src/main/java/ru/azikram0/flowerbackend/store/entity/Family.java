@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Entity
 @Table(name = "family")
 @NoArgsConstructor
@@ -22,7 +20,4 @@ public class Family {
 
     @Column(name = "name", nullable = false)
     private String name;
-
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Flower> flowers;
 }
