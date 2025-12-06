@@ -1,4 +1,4 @@
-package ru.azikram0.flowerbackend.store.entity;
+package ru.azikram0.flowerbackend.store.entity.db;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -36,19 +36,15 @@ public class Flower {
     @Column(name = "description")
     private String description;
 
-    @ManyToMany(
-            fetch = FetchType.LAZY,
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}
+    @OneToMany(
+            mappedBy = "flower",
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
+            fetch = FetchType.EAGER
     )
-    @JoinTable(
-            name = "flower_color",
-            joinColumns = @JoinColumn(name = "flower_id"),
-            inverseJoinColumns = @JoinColumn(name = "color_id")
-    )
-    private List<Color> colors;
+    private List<FlowerColor> flowerColors;
 
     @ManyToMany(
-            fetch = FetchType.LAZY,
+            fetch = FetchType.EAGER,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}
     )
     @JoinTable(

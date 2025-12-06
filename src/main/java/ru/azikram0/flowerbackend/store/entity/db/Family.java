@@ -1,4 +1,4 @@
-package ru.azikram0.flowerbackend.store.entity;
+package ru.azikram0.flowerbackend.store.entity.db;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,20 +7,17 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "color")
+@Table(name = "family")
 @NoArgsConstructor
 @Getter
 @Setter
 @AllArgsConstructor
-public class Color {
+public class Family {
     @Id
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
 
     @Column(name = "name", nullable = false)
     private String name;
-
-    @Column(name = "hex", nullable = false, length = 7)
-    private String hex;
 }
