@@ -24,7 +24,7 @@ public class FlowerColor {
     @JoinColumn(name = "flower_id", nullable = false)
     private Flower flower;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("colorId")
     @JoinColumn(name = "color_id", nullable = false)
     private Color color;

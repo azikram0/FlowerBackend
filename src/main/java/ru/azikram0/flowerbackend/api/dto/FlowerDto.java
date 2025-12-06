@@ -6,10 +6,12 @@ import java.util.List;
 public record FlowerDto(
         int id,
         String name,
+        int colorId,
         String photoUrl,
         String description,
         List<String> colorNames,
         List<String> careTags,
+        String familyName,
         BigDecimal price
 ) {
 }

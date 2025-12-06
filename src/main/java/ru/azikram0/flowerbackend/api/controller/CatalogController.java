@@ -13,8 +13,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/catalog")
 public class CatalogController {
-    @GetMapping("/flower/{id}")
-    public FlowerDto getFlowerById(@PathVariable int id) {
+    @GetMapping("/flower/{id}/{colorId}")
+    public FlowerDto getFlowerByIdAndColorId(@PathVariable int id, @PathVariable int colorId) {
         return null;
     }
 

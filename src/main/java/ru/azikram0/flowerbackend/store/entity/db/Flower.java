@@ -25,7 +25,7 @@ public class Flower {
     private String name;
 
     @ManyToOne(
-            fetch = FetchType.EAGER,
+            fetch = FetchType.LAZY,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}
     )
     private Family family;
@@ -39,12 +39,12 @@ public class Flower {
     @OneToMany(
             mappedBy = "flower",
             cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
-            fetch = FetchType.EAGER
+            fetch = FetchType.LAZY
     )
     private List<FlowerColor> flowerColors;
 
     @ManyToMany(
-            fetch = FetchType.EAGER,
+            fetch = FetchType.LAZY,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}
     )
     @JoinTable(
