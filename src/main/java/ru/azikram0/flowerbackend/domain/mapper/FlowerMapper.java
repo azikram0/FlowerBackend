@@ -25,6 +25,8 @@ public class FlowerMapper {
         List<String> colorNames = flower.getFlowerColors().stream()
                 .map(fc -> fc.getColor().getName())
                 .toList();
+        List<String> photoUrls = flower.getFlowerColors().stream()
+                .map(FlowerColor::getPhotoUrl).toList();
         List<String> careTags = flower.getCareTags().stream().map(CareTag::getName).toList();
         return new FlowerDto(
                 flower.getId(),
@@ -34,6 +36,7 @@ public class FlowerMapper {
                 flower.getDescription(),
                 colorNames,
                 careTags,
+                photoUrls,
                 flower.getFamily().getName(),
                 flower.getPrice()
         );

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Каталог цветов</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="site-header">
+    <div class="container header-inner">
+        <h1 class="logo">Каталог цветов</h1>
+        <div class="header-right">
+            <input id="search-input" class="search" placeholder="Поиск по названию..." />
+        </div>
+    </div>
+</header>
+
+<main class="container main-grid">
+    <aside class="filters" id="filters">
+        <h3>Фильтры</h3>
+
+        <section class="filter-block">
+            <label>Цена</label>
+            <div class="price-row">
+                <input id="min-price" type="number" placeholder="min" class="price-input" />
+                <span class="price-separator">–</span>
+                <input id="max-price" type="number" placeholder="max" class="price-input" />
+            </div>
+        </section>
+
+        <section class="filter-block">
+            <label>Семейства</label>
+            <div id="families-list" class="checklist"></div>
+        </section>
+
+        <section class="filter-block">
+            <label>Цвета</label>
+            <div id="colors-list" class="checklist"></div>
+        </section>
+
+        <section class="filter-block">
+            <label>Особенности ухода</label>
+            <div id="caretags-list" class="checklist"></div>
+        </section>
+
+        <div class="filters-actions">
+            <button id="apply-filters">Применить</button>
+            <button id="reset-filters" class="ghost">Сбросить</button>
+        </div>
+    </aside>
+
+    <section class="content">
+        <div id="catalog" class="cards-grid"></div>
+        <div id="empty" class="empty" hidden>Ничего не найдено</div>
+    </section>
+</main>
+
+<footer class="site-footer">
+    <div class="container">© Каталог цветов</div>
+</footer>
+
+<script src="app.js" type="module"></script>
+</body>
+</html>
