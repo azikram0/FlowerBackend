@@ -11,6 +11,7 @@ public record FlowerDto(
         String description,
         List<String> colorNames,
         List<String> careTags,
+        List<String> photoUrls,
         String familyName,
         BigDecimal price
 ) {
