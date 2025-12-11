@@ -1,4 +1,4 @@
-// app.js (ES module)
+
 const BASE_URL = window.location.origin;
 
 // ---------- helpers ----------
@@ -49,6 +49,106 @@ let stateFilters = {
     colorNames: [],
     careTagNames: []
 };
+
+// ---------- URL state management ----------
+function updateUrlFromFilters() {
+    const params = {};
+
+    const { name, ...filters } = stateFilters;
+
+    if (filters.minPrice != null) params.minPrice = filters.minPrice;
+    if (filters.maxPrice != null) params.maxPrice = filters.maxPrice;
+    if (filters.familyNames.length) params.familyNames = filters.familyNames;
+    if (filters.colorNames.length) params.colorNames = filters.colorNames;
+    if (filters.careTagNames.length) params.careTagNames = filters.careTagNames;
+
+    const query = buildQuery(params);
+    const newHash = query ? `#${query.slice(1)}` : '';
+
+    if (window.location.hash !== newHash) {
+        window.location.hash = newHash;
+    }
+}
+
+function parseHashToFilters() {
+    const hash = window.location.hash.slice(1);
+    if (!hash) return null;
+
+    const params = new URLSearchParams(hash);
+    const filters = {};
+
+    const minPrice = toNum(params.get('minPrice'));
+    if (minPrice != null) filters.minPrice = minPrice;
+
+    const maxPrice = toNum(params.get('maxPrice'));
+    if (maxPrice != null) filters.maxPrice = maxPrice;
+
+    const familyNames = params.getAll('familyNames');
+    if (familyNames.length) filters.familyNames = familyNames;
+
+    const colorNames = params.getAll('colorNames');
+    if (colorNames.length) filters.colorNames = colorNames;
+
+    const careTagNames = params.getAll('careTagNames');
+    if (careTagNames.length) filters.careTagNames = careTagNames;
+
+    return filters;
+}
+
+function restoreFiltersFromHash() {
+    const hashFilters = parseHashToFilters();
+    if (!hashFilters) return;
+
+    if (hashFilters.minPrice != null) {
+        stateFilters.minPrice = hashFilters.minPrice;
+        minPriceInput.value = hashFilters.minPrice;
+    } else {
+        stateFilters.minPrice = undefined;
+        minPriceInput.value = '';
+    }
+
+    if (hashFilters.maxPrice != null) {
+        stateFilters.maxPrice = hashFilters.maxPrice;
+        maxPriceInput.value = hashFilters.maxPrice;
+    } else {
+        stateFilters.maxPrice = undefined;
+        maxPriceInput.value = '';
+    }
+
+    const fam = Array.isArray(hashFilters.familyNames) ? hashFilters.familyNames : [];
+    if (fam.length) {
+        stateFilters.familyNames = fam;
+        checkValues(familiesList, fam);
+    } else {
+        stateFilters.familyNames = [];
+        uncheckAll(familiesList);
+    }
+
+    const cols = Array.isArray(hashFilters.colorNames) ? hashFilters.colorNames : [];
+    if (cols.length) {
+        stateFilters.colorNames = cols;
+        checkValues(colorsList, cols);
+    } else {
+        stateFilters.colorNames = [];
+        uncheckAll(colorsList);
+    }
+
+    const cares = Array.isArray(hashFilters.careTagNames) ? hashFilters.careTagNames : [];
+    if (cares.length) {
+        stateFilters.careTagNames = cares;
+        checkValues(careTagsList, cares);
+    } else {
+        stateFilters.careTagNames = [];
+        uncheckAll(careTagsList);
+    }
+}
+
+
+function checkValues(container, values) {
+    Array.from(container.querySelectorAll('input[type=checkbox]')).forEach(input => {
+        input.checked = values.includes(input.value);
+    });
+}
 
 // ---------- lazy modal ----------
 let detailModal = null;
@@ -102,7 +202,6 @@ async function showDetail(id, colorId) {
 }
 
 function renderDetail(flower) {
-    // Собираем все фото для карусели
     const extras = Array.isArray(flower.photos) ? flower.photos :
         Array.isArray(flower.photoUrls) ? flower.photoUrls :
             Array.isArray(flower.images) ? flower.images :
@@ -146,7 +245,6 @@ function renderDetail(flower) {
         </div>
     `;
 
-    // Логика управления каруселью
     if (normalized.length > 1) {
         const mainImg = detailBody.querySelector('#detail-main-image');
         const prevBtn = detailBody.querySelector('#carousel-prev');
@@ -194,14 +292,76 @@ async function init() {
 
     bindEvents();
     await loadFilterOptions();
+
+    restoreFiltersFromHash();
+
     triggerSearch();
+
+    window.addEventListener('hashchange', () => {
+        const hashFilters = parseHashToFilters();
+        if (hashFilters) {
+            applyFiltersFromHash(hashFilters);
+            triggerSearch();
+        } else {
+            stateFilters = { name:'', minPrice:undefined, maxPrice:undefined, familyNames:[], colorNames:[], careTagNames:[] };
+            searchInput.value = '';
+            minPriceInput.value = '';
+            maxPriceInput.value = '';
+            uncheckAll(familiesList);
+            uncheckAll(colorsList);
+            uncheckAll(careTagsList);
+            triggerSearch();
+        }
+    });
+}
+
+function applyFiltersFromHash(hashFilters) {
+    if (hashFilters.minPrice != null) {
+        stateFilters.minPrice = hashFilters.minPrice;
+        minPriceInput.value = hashFilters.minPrice;
+    } else {
+        stateFilters.minPrice = undefined;
+        minPriceInput.value = '';
+    }
+
+    if (hashFilters.maxPrice != null) {
+        stateFilters.maxPrice = hashFilters.maxPrice;
+        maxPriceInput.value = hashFilters.maxPrice;
+    } else {
+        stateFilters.maxPrice = undefined;
+        maxPriceInput.value = '';
+    }
+
+    if (hashFilters.familyNames && hashFilters.familyNames.length) {
+        stateFilters.familyNames = hashFilters.familyNames;
+        checkValues(familiesList, hashFilters.familyNames);
+    } else {
+        stateFilters.familyNames = [];
+        uncheckAll(familiesList);
+    }
+
+    if (hashFilters.colorNames && hashFilters.colorNames.length) {
+        stateFilters.colorNames = hashFilters.colorNames;
+        checkValues(colorsList, hashFilters.colorNames);
+    } else {
+        stateFilters.colorNames = [];
+        uncheckAll(colorsList);
+    }
+
+    if (hashFilters.careTagNames && hashFilters.careTagNames.length) {
+        stateFilters.careTagNames = hashFilters.careTagNames;
+        checkValues(careTagsList, hashFilters.careTagNames);
+    } else {
+        stateFilters.careTagNames = [];
+        uncheckAll(careTagsList);
+    }
 }
 
 // ---------- bind events ----------
 function bindEvents() {
     searchInput.addEventListener('input', debounce(e => {
         stateFilters.name = e.target.value.trim();
-        triggerSearch();
+        triggerSearch(); // При поиске по имени URL не обновляется
     }, 350));
 
     applyBtn.addEventListener('click', () => {
@@ -210,18 +370,35 @@ function bindEvents() {
         stateFilters.familyNames = getCheckedValues(familiesList);
         stateFilters.colorNames = getCheckedValues(colorsList);
         stateFilters.careTagNames = getCheckedValues(careTagsList);
+
+        stateFilters.name = '';
+        searchInput.value = '';
+
         triggerSearch();
     });
 
     resetBtn.addEventListener('click', () => {
-        stateFilters = { name:'', minPrice:undefined, maxPrice:undefined, familyNames:[], colorNames:[], careTagNames:[] };
+        stateFilters = {
+            name: '',
+            minPrice: undefined,
+            maxPrice: undefined,
+            familyNames: [],
+            colorNames: [],
+            careTagNames: []
+        };
         searchInput.value = '';
         minPriceInput.value = '';
         maxPriceInput.value = '';
         uncheckAll(familiesList);
         uncheckAll(colorsList);
         uncheckAll(careTagsList);
-        triggerSearch();
+
+        if (window.location.hash) {
+            window.location.href = '/catalog'
+        }
+        else {
+            triggerSearch();
+        }
     });
 
     catalogRoot.addEventListener('click', (ev) => {
@@ -256,6 +433,8 @@ async function doSearch() {
     try {
         const list = await apiGet(`/catalog/search-flowers${query}`);
         renderCards(list);
+
+        updateUrlFromFilters();
     } catch (err) {
         catalogRoot.innerHTML = `<div class="empty">Ошибка при загрузке: ${escapeHtml(err.message)}</div>`;
     }
