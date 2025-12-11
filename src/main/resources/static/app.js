@@ -102,14 +102,38 @@ async function showDetail(id, colorId) {
 }
 
 function renderDetail(flower) {
+    // Собираем все фото для карусели
+    const extras = Array.isArray(flower.photos) ? flower.photos :
+        Array.isArray(flower.photoUrls) ? flower.photoUrls :
+            Array.isArray(flower.images) ? flower.images :
+                Array.isArray(flower.otherPhotoUrls) ? flower.otherPhotoUrls : [];
+    const primary = flower.photoUrl || '';
+    const normalized = primary ? [primary, ...extras.filter(p => p && p !== primary)] : extras.filter(Boolean);
+    if (normalized.length === 0) normalized.push('');
+
     detailBody.innerHTML = `
         <h2 style="margin:0 0 8px 0">${escapeHtml(flower.name)}</h2>
-        <img class="detail-image" src="${escapeHtml(flower.photoUrl || '')}" alt="${escapeHtml(flower.name)}" loading="lazy" />
+        <div id="detail-carousel" style="position:relative;">
+            <img id="detail-main-image" class="detail-image" src="${escapeHtml(normalized[0])}" alt="${escapeHtml(flower.name)}" loading="lazy" />
+            ${normalized.length > 1 ? `
+                <button id="carousel-prev" aria-label="Предыдущее" title="Предыдущее" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);z-index:2;border:0;background:rgba(255,255,255,0.8);padding:8px;border-radius:999px;cursor:pointer">‹</button>
+                <button id="carousel-next" aria-label="Следующее" title="Следующее" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);z-index:2;border:0;background:rgba(255,255,255,0.8);padding:8px;border-radius:999px;cursor:pointer">›</button>
+            ` : ''}
+        </div>
         <div class="detail-grid">
             <div>
                 <p><strong>Семейство:</strong> ${escapeHtml(flower.familyName || '')}</p>
                 <p><strong>Цена:</strong> ${formatPrice(flower.price)}</p>
                 <p style="margin-top:8px">${escapeHtml(flower.description || '')}</p>
+                ${normalized.length > 1 ? `
+                    <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+                        ${normalized.map((p, i) => `
+                            <button data-thumb-index="${i}" class="thumb-btn" style="border:0;padding:0;background:transparent;cursor:pointer">
+                                <img src="${escapeHtml(p)}" alt="${escapeHtml(flower.name)}" style="width:64px;height:48px;object-fit:cover;border-radius:6px;"/>
+                            </button>
+                        `).join('')}
+                    </div>
+                ` : ''}
             </div>
             <div>
                 <div class="detail-box">
@@ -121,6 +145,44 @@ function renderDetail(flower) {
             </div>
         </div>
     `;
+
+    // Логика управления каруселью
+    if (normalized.length > 1) {
+        const mainImg = detailBody.querySelector('#detail-main-image');
+        const prevBtn = detailBody.querySelector('#carousel-prev');
+        const nextBtn = detailBody.querySelector('#carousel-next');
+        const thumbBtns = Array.from(detailBody.querySelectorAll('.thumb-btn'));
+        let currentIndex = 0;
+
+        const updateMain = () => {
+            mainImg.src = normalized[currentIndex] || '';
+            thumbBtns.forEach(b => b.removeAttribute('aria-current'));
+            const active = thumbBtns.find(b => Number(b.dataset.thumbIndex) === currentIndex);
+            if (active) active.setAttribute('aria-current', 'true');
+        };
+
+        prevBtn.addEventListener('click', () => {
+            currentIndex = (currentIndex - 1 + normalized.length) % normalized.length;
+            updateMain();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            currentIndex = (currentIndex + 1) % normalized.length;
+            updateMain();
+        });
+
+        thumbBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const i = Number(btn.dataset.thumbIndex);
+                if (Number.isFinite(i)) {
+                    currentIndex = i;
+                    updateMain();
+                }
+            });
+        });
+
+        updateMain();
+    }
 }
 
 // ---------- init ----------
@@ -132,7 +194,6 @@ async function init() {
 
     bindEvents();
     await loadFilterOptions();
-
     triggerSearch();
 }
 
@@ -208,7 +269,13 @@ function renderCards(list) {
     }
     emptyNode.hidden = true;
 
+    const seen = new Set();
     for (const c of list) {
+        if (!c || c.id == null) continue;
+        const id = String(c.id);
+        if (seen.has(id)) continue;
+        seen.add(id);
+
         const card = document.createElement('article');
         card.className = 'card';
         card.innerHTML = `
