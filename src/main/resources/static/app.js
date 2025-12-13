@@ -1,18 +1,26 @@
-
 const BASE_URL = window.location.origin;
 
 // ---------- helpers ----------
-function q(selector, root = document) { return root.querySelector(selector); }
-function qa(selector, root = document) { return Array.from(root.querySelectorAll(selector)); }
+function q(selector, root = document) {
+    return root.querySelector(selector);
+}
+
+function qa(selector, root = document) {
+    return Array.from(root.querySelectorAll(selector));
+}
 
 function buildQuery(params = {}) {
     const parts = [];
     for (const [k, v] of Object.entries(params)) {
         if (v == null) continue;
         if (Array.isArray(v)) {
-            v.forEach(item => { if (item != null && item !== '') parts.push(`${encodeURIComponent(k)}=${encodeURIComponent(item)}`); });
+            v.forEach(item => {
+                if (item != null && item !== '')
+                    parts.push(`${encodeURIComponent(k)}=${encodeURIComponent(item)}`);
+            });
         } else {
-            if (v !== '') parts.push(`${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`);
+            if (v !== '')
+                parts.push(`${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`);
         }
     }
     return parts.length ? `?${parts.join('&')}` : '';
@@ -21,7 +29,7 @@ function buildQuery(params = {}) {
 async function apiGet(path) {
     const res = await fetch(`${BASE_URL}${path}`);
     if (!res.ok) {
-        const text = await res.text().catch(()=>res.statusText);
+        const text = await res.text().catch(() => res.statusText);
         throw new Error(`${res.status} ${res.statusText}: ${text}`);
     }
     return res.json();
@@ -54,7 +62,7 @@ let stateFilters = {
 function updateUrlFromFilters() {
     const params = {};
 
-    const { name, ...filters } = stateFilters;
+    const {name, ...filters} = stateFilters;
 
     if (filters.minPrice != null) params.minPrice = filters.minPrice;
     if (filters.maxPrice != null) params.maxPrice = filters.maxPrice;
@@ -237,9 +245,9 @@ function renderDetail(flower) {
             <div>
                 <div class="detail-box">
                     <div><strong>Цвета</strong></div>
-                    <div style="margin-top:8px">${(flower.colorNames || []).map(c=>`<span class="tag">${escapeHtml(c)}</span>`).join('')}</div>
+                    <div style="margin-top:8px">${(flower.colorNames || []).map(c => `<span class="tag">${escapeHtml(c)}</span>`).join('')}</div>
                     <div style="margin-top:12px"><strong>Особенности ухода</strong></div>
-                    <div style="margin-top:8px">${(flower.careTags || []).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
+                    <div style="margin-top:8px">${(flower.careTags || []).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
                 </div>
             </div>
         </div>
@@ -300,10 +308,17 @@ async function init() {
     window.addEventListener('hashchange', () => {
         const hashFilters = parseHashToFilters();
         if (hashFilters) {
-            applyFiltersFromHash(hashFilters);
+            restoreFiltersFromHash();
             triggerSearch();
         } else {
-            stateFilters = { name:'', minPrice:undefined, maxPrice:undefined, familyNames:[], colorNames:[], careTagNames:[] };
+            stateFilters = {
+                name: '',
+                minPrice: undefined,
+                maxPrice: undefined,
+                familyNames: [],
+                colorNames: [],
+                careTagNames: []
+            };
             searchInput.value = '';
             minPriceInput.value = '';
             maxPriceInput.value = '';
@@ -315,53 +330,11 @@ async function init() {
     });
 }
 
-function applyFiltersFromHash(hashFilters) {
-    if (hashFilters.minPrice != null) {
-        stateFilters.minPrice = hashFilters.minPrice;
-        minPriceInput.value = hashFilters.minPrice;
-    } else {
-        stateFilters.minPrice = undefined;
-        minPriceInput.value = '';
-    }
-
-    if (hashFilters.maxPrice != null) {
-        stateFilters.maxPrice = hashFilters.maxPrice;
-        maxPriceInput.value = hashFilters.maxPrice;
-    } else {
-        stateFilters.maxPrice = undefined;
-        maxPriceInput.value = '';
-    }
-
-    if (hashFilters.familyNames && hashFilters.familyNames.length) {
-        stateFilters.familyNames = hashFilters.familyNames;
-        checkValues(familiesList, hashFilters.familyNames);
-    } else {
-        stateFilters.familyNames = [];
-        uncheckAll(familiesList);
-    }
-
-    if (hashFilters.colorNames && hashFilters.colorNames.length) {
-        stateFilters.colorNames = hashFilters.colorNames;
-        checkValues(colorsList, hashFilters.colorNames);
-    } else {
-        stateFilters.colorNames = [];
-        uncheckAll(colorsList);
-    }
-
-    if (hashFilters.careTagNames && hashFilters.careTagNames.length) {
-        stateFilters.careTagNames = hashFilters.careTagNames;
-        checkValues(careTagsList, hashFilters.careTagNames);
-    } else {
-        stateFilters.careTagNames = [];
-        uncheckAll(careTagsList);
-    }
-}
-
 // ---------- bind events ----------
 function bindEvents() {
     searchInput.addEventListener('input', debounce(e => {
         stateFilters.name = e.target.value.trim();
-        triggerSearch(); // При поиске по имени URL не обновляется
+        triggerSearch();
     }, 350));
 
     applyBtn.addEventListener('click', () => {
@@ -395,8 +368,7 @@ function bindEvents() {
 
         if (window.location.hash) {
             window.location.href = '/catalog'
-        }
-        else {
+        } else {
             triggerSearch();
         }
     });
@@ -501,7 +473,7 @@ function fillChecklist(container, items = []) {
         return;
     }
     items.forEach(it => {
-        const id = `chk-${Math.random().toString(36).slice(2,8)}`;
+        const id = `chk-${Math.random().toString(36).slice(2, 8)}`;
         const label = document.createElement('label');
         label.innerHTML = `<input id="${id}" type="checkbox" value="${escapeHtml(it)}"> <span>${escapeHtml(it)}</span>`;
         container.appendChild(label);
@@ -536,18 +508,18 @@ function formatPrice(p) {
 
 function escapeHtml(s = '') {
     return String(s)
-        .replaceAll('&','&amp;')
-        .replaceAll('<','&lt;')
-        .replaceAll('>','&gt;')
-        .replaceAll('"','&quot;')
-        .replaceAll("'",'&#039;');
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
 }
 
-function debounce(fn, delay){
+function debounce(fn, delay) {
     let t;
-    return (...a)=>{
+    return (...a) => {
         clearTimeout(t);
-        t = setTimeout(()=>fn(...a), delay);
+        t = setTimeout(() => fn(...a), delay);
     };
 }
 
